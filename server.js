@@ -8,10 +8,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ========== YOUR CREDENTIALS ==========
-const TWILIO_ACCOUNT_SID = 'AC8bb657b1826ad3af3f93e9a881f07554';
-const TWILIO_AUTH_TOKEN = '0d7d109df385b1ab77b24beb974f1822';
-const TWILIO_PHONE_NUMBER = '+17855725693';
+// ========== YOUR UPDATED TWILIO CREDENTIALS ==========
+const TWILIO_ACCOUNT_SID = 'AC4e0345264a61d0b30bd58abc2b21644f';
+const TWILIO_AUTH_TOKEN = '9ed4352af6d291f5fd9e3fc2494bdb70';
+const TWILIO_PHONE_NUMBER = '+19015896492';  // YOUR NEW NUMBER
 const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL || 'https://calling-agent-jrfj.onrender.com';
 
 const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
@@ -145,14 +145,15 @@ app.get('/', (req, res) => {
         }
         h1 { color: #b8860b; text-align: center; margin-bottom: 5px; }
         .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
-        .exotel-badge {
-            background: #e8f5e9;
-            color: #2e7d32;
+        .status-badge {
+            background: #4caf50;
+            color: white;
             padding: 8px;
             border-radius: 8px;
             text-align: center;
-            font-size: 12px;
+            font-size: 14px;
             margin-bottom: 20px;
+            font-weight: bold;
         }
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #333; }
@@ -221,7 +222,7 @@ app.get('/', (req, res) => {
     <div class="container">
         <h1>💎 Harsahaimal Shiamlal Jewellers</h1>
         <div class="subtitle">AI Voice Caller - Live</div>
-        <div class="exotel-badge">✅ Connected to Twilio: ${TWILIO_PHONE_NUMBER}</div>
+        <div class="status-badge">✅ Connected to Twilio: ${TWILIO_PHONE_NUMBER}</div>
         <div class="stats">
             <div class="stat-card"><div class="stat-number" id="totalCalls">0</div><div class="stat-label">Total Calls</div></div>
             <div class="stat-card"><div class="stat-number" id="leads">0</div><div class="stat-label">Interested</div></div>
@@ -241,7 +242,7 @@ app.get('/', (req, res) => {
         </div>
         <button onclick="makeCall()" id="callBtn">📞 Make AI Call Now</button>
         <div id="loading" class="loading">⏳ Initiating call...</div>
-        <div class="info">💡 Press 1 if interested in jewellery</div>
+        <div class="info">💡 Press 1 if interested in jewellery | Using Twilio Number: ${TWILIO_PHONE_NUMBER}</div>
         <div class="call-log"><h3>📋 Recent Call Log</h3><div id="callLogs"><div class="log-entry">Ready to make calls!</div></div></div>
     </div>
     <script>
@@ -272,9 +273,9 @@ app.get('/', (req, res) => {
                     body: JSON.stringify({ name, phone, purpose, language })
                 });
                 const result = await response.json();
-                if (result.success) { alert(\`✅ Call initiated to \${name}!\`); loadStats(); }
+                if (result.success) { alert(\`✅ Call initiated to \${name}! The phone will ring shortly.\`); loadStats(); }
                 else { alert(\`❌ Failed: \${result.error}\`); }
-            } catch(error) { alert('❌ Server error. Make sure server is running.'); }
+            } catch(error) { alert('❌ Server error. Please try again.'); }
             finally { btn.disabled = false; loading.style.display = 'none'; }
         }
         loadStats(); setInterval(loadStats, 5000);
@@ -300,6 +301,10 @@ function loadStats() {
 const PORT = process.env.PORT || 3000;
 loadStats();
 app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`\n========================================`);
+    console.log(`✅ AI CALLER IS RUNNING!`);
+    console.log(`========================================`);
     console.log(`📞 Twilio Number: ${TWILIO_PHONE_NUMBER}`);
+    console.log(`🌐 Open your Render URL to start!`);
+    console.log(`========================================\n`);
 });
