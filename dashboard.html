@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Harsahaimal Shiamlal - AI Call Center</title>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #b8860b;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .exotel-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #b8860b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover:not(:disabled) {
+            background: #9a720a;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #b8860b;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .call-log {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            background: #f8f9fa;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            border-left: 3px solid #b8860b;
+        }
+        .status-success {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: #b8860b;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💎 Harsahaimal Shiamlal Jewellers</h1>
+        <div class="subtitle">AI Voice Caller - Live Exotel</div>
+        
+        <div class="exotel-badge">
+            ✅ Connected to Exotel: harsahaimalshiamlaljewellers1
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalCalls">0</div>
+                <div class="stat-label">Total Calls</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="leads">0</div>
+                <div class="stat-label">Interested</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="conversion">0%</div>
+                <div class="stat-label">Conversion</div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>👤 Customer Name</label>
+            <input type="text" id="customerName" placeholder="e.g., Rajesh Sharma" value="Test Customer">
+        </div>
+        
+        <div class="form-group">
+            <label>📱 Phone Number (with +91)</label>
+            <input type="tel" id="phoneNumber" placeholder="+91 98765 43210" value="+91">
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                ⚠️ Enter REAL phone number including +91 (e.g., +919876543210)
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>🎯 Call Purpose</label>
+            <select id="purpose">
+                <option value="Gold Rate Enquiry">💰 Gold Rate Enquiry</option>
+                <option value="Jewellery Sales">💍 Jewellery Sales</option>
+                <option value="Wedding Collection">💒 Wedding Collection</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>🗣️ Language</label>
+            <select id="language">
+                <option value="hi-in">🇮🇳 Hindi</option>
+                <option value="en-in">🇬🇧 English</option>
+            </select>
+        </div>
+        
+        <button onclick="makeCall()" id="callBtn">📞 Make AI Call Now</button>
+        <div id="loading" class="loading">⏳ Initiating call via Exotel...</div>
+        
+        <div class="info">
+            💡 <strong>How it works:</strong><br>
+            1. Click the button - Exotel calls the customer<br>
+            2. AI speaks about gold rates<br>
+            3. Customer presses 1 if interested
+        </div>
+        
+        <div class="call-log">
+            <h3>📋 Recent Call Log</h3>
+            <div id="callLogs">
+                <div class="log-entry">No calls made yet.</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadStats() {
+            try {
+                const response = await fetch('http://localhost:3000/stats');
+                const data = await response.json();
+                document.getElementById('totalCalls').innerText = data.totalCalls;
+                document.getElementById('leads').innerText = data.leadsCount;
+                document.getElementById('conversion').innerText = data.conversionRate + '%';
+                
+                const logDiv = document.getElementById('callLogs');
+                if (data.recentCalls && data.recentCalls.length > 0) {
+                    logDiv.innerHTML = data.recentCalls.map(call => `
+                        <div class="log-entry">
+                            <strong>${call.name}</strong> - ${call.phone}<br>
+                            ${call.purpose}<br>
+                            <small>${call.time}</small>
+                            <span class="status-success"> ✓ ${call.status}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                console.log('Waiting for server...');
+            }
+        }
+        
+        async function makeCall() {
+            const name = document.getElementById('customerName').value;
+            const phone = document.getElementById('phoneNumber').value;
+            const purpose = document.getElementById('purpose').value;
+            const language = document.getElementById('language').value;
+            
+            if (!name || !phone || phone === '+91') {
+                alert('❌ Please enter customer name and valid phone number with +91');
+                return;
+            }
+            
+            const btn = document.getElementById('callBtn');
+            const loading = document.getElementById('loading');
+            btn.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('http://localhost:3000/make-call', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, purpose, language })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ SUCCESS! Call initiated to ${name}\n\nThe customer will receive a call from ${EXOTEL_CALLER_ID}`);
+                    loadStats();
+                } else {
+                    alert(`❌ Call failed: ${result.error}`);
+                }
+            } catch(error) {
+                alert('❌ Cannot connect to server. Make sure server is running!\n\nIn Command Prompt, run: node server.js');
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        loadStats();
+        setInterval(loadStats, 3000);
+    </script>
+</body>
+</html>
