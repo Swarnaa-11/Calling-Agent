@@ -7,10 +7,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// YOUR TWILIO CREDENTIALS
+// ========== YOUR CREDENTIALS (ALL FILLED) ==========
 const TWILIO_ACCOUNT_SID = 'AC8bb657b1826ad3af3f93e9a881f07554';
 const TWILIO_AUTH_TOKEN = '0d7d109df385b1ab77b24beb974f1822';
 const TWILIO_PHONE_NUMBER = '+17855725693';
+const PUBLIC_URL = 'https://calling-agent-jrfj.onrender.com';  // YOUR LIVE URL
 
 const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
@@ -19,33 +20,14 @@ let callHistory = [];
 let totalCalls = 0;
 let leadsCount = 0;
 
-// Make a real phone call
+// Make a real phone call using Twilio
 app.post('/make-call', async (req, res) => {
     const { name, phone, purpose, language } = req.body;
     
     console.log(`\n📞 Calling ${name} at ${phone}`);
     
     try {
-        // IMPORTANT: You need a public URL. Use a free service like:
-        // Option A: Upload this file to Render.com (free)
-        // Option B: Use Vercel (free)
-        // Option C: For now, let's test with your computer's IP
-        
-        // Get your local IP address
-        const os = require('os');
-        const networkInterfaces = os.networkInterfaces();
-        let localIp = 'localhost';
-        
-        for (const interface of Object.values(networkInterfaces)) {
-            for (const config of interface) {
-                if (!config.internal && config.family === 'IPv4') {
-                    localIp = config.address;
-                    break;
-                }
-            }
-        }
-        
-        const voiceUrl = `http://${localIp}:3000/voice-response?name=${encodeURIComponent(name)}&purpose=${encodeURIComponent(purpose)}&lang=${language || 'hi-in'}`;
+        const voiceUrl = `${PUBLIC_URL}/voice-response?name=${encodeURIComponent(name)}&purpose=${encodeURIComponent(purpose)}&lang=${language || 'hi-in'}`;
         
         console.log(`📞 Voice URL: ${voiceUrl}`);
         
@@ -53,7 +35,7 @@ app.post('/make-call', async (req, res) => {
             url: voiceUrl,
             to: phone,
             from: TWILIO_PHONE_NUMBER,
-            statusCallback: '/call-status',
+            statusCallback: `${PUBLIC_URL}/call-status`,
             statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed']
         });
         
@@ -69,6 +51,8 @@ app.post('/make-call', async (req, res) => {
         
         saveStats();
         
+        console.log(`✅ Call initiated! SID: ${call.sid}`);
+        
         res.json({ 
             success: true, 
             message: `✅ Call initiated to ${name}`,
@@ -76,18 +60,20 @@ app.post('/make-call', async (req, res) => {
         });
         
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        console.error('❌ Twilio Error:', error.message);
         res.json({ 
             success: false, 
-            error: error.message + ' - You need a public URL. Try using a free hosting service like Render.com' 
+            error: error.message 
         });
     }
 });
 
-// Voice response
+// Voice response when customer answers
 app.get('/voice-response', (req, res) => {
     const { name, purpose, lang } = req.query;
     const goldRate = 70100;
+    
+    console.log(`\n📞 Customer ${name} answered!`);
     
     const twiml = new twilio.twiml.VoiceResponse();
     
@@ -109,9 +95,12 @@ app.get('/voice-response', (req, res) => {
     res.send(twiml.toString());
 });
 
+// Handle customer response
 app.post('/handle-response', (req, res) => {
     const digit = req.body.Digits;
     const name = req.query.name;
+    
+    console.log(`\n📞 ${name} pressed: ${digit === '1' ? 'INTERESTED ✅' : 'NOT INTERESTED ❌'}`);
     
     const twiml = new twilio.twiml.VoiceResponse();
     
@@ -119,7 +108,7 @@ app.post('/handle-response', (req, res) => {
         leadsCount++;
         saveStats();
         twiml.say({ voice: 'Polly.Aditi', language: 'hi-IN' }, 
-            `Bahut badhiya ${name} ji! Main aapka appointment book kar deta hoon. Dhanyawad!`);
+            `Bahut badhiya ${name} ji! Main aapka appointment book kar deta hoon. Hamari team aapse call karegi. Dhanyawad!`);
     } else {
         twiml.say({ voice: 'Polly.Aditi', language: 'hi-IN' }, 
             `Koi baat nahi ${name} ji. Shukriya!`);
@@ -129,11 +118,14 @@ app.post('/handle-response', (req, res) => {
     res.send(twiml.toString());
 });
 
+// Call status webhook
 app.post('/call-status', (req, res) => {
-    console.log(`📞 Call status: ${req.body.CallStatus}`);
+    const { CallSid, CallStatus, CallDuration } = req.body;
+    console.log(`\n📞 Call ${CallSid}: ${CallStatus}`);
     res.sendStatus(200);
 });
 
+// Get statistics
 app.get('/stats', (req, res) => {
     res.json({
         totalCalls: totalCalls,
@@ -143,13 +135,18 @@ app.get('/stats', (req, res) => {
     });
 });
 
+// Serve dashboard
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/dashboard.html');
+});
+
+// Save stats
+const fs = require('fs');
 function saveStats() {
-    const fs = require('fs');
     fs.writeFileSync('stats.json', JSON.stringify({ totalCalls, leadsCount, callHistory }, null, 2));
 }
 
 function loadStats() {
-    const fs = require('fs');
     if (fs.existsSync('stats.json')) {
         const stats = JSON.parse(fs.readFileSync('stats.json'));
         totalCalls = stats.totalCalls || 0;
@@ -158,18 +155,14 @@ function loadStats() {
     }
 }
 
-const PORT = 3000;
+// Start server
+const PORT = process.env.PORT || 3000;
 loadStats();
 app.listen(PORT, () => {
     console.log('\n========================================');
-    console.log('✅ SERVER RUNNING!');
+    console.log('✅ AI CALLER IS LIVE!');
     console.log('========================================');
-    console.log(`🌐 Dashboard: http://localhost:3000`);
+    console.log(`🌐 Your URL: ${PUBLIC_URL}`);
+    console.log(`📞 Twilio Number: ${TWILIO_PHONE_NUMBER}`);
     console.log('========================================\n');
-    console.log('⚠️  IMPORTANT: This will NOT work for calls yet!');
-    console.log('You need a PUBLIC URL. Use one of these FREE services:\n');
-    console.log('1. Render.com (free) - Upload this folder');
-    console.log('2. Vercel (free) - Deploy with one click');
-    console.log('3. Cyclic.sh (free) - Easy Node.js hosting');
-    console.log('\nOr use a different solution - tell me which you prefer!\n');
 });
